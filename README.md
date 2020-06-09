@@ -34,7 +34,7 @@ o visual deve ser o mais simples e funcional possivel
 - A estrutura de pastas e de código do projeto sera avaliada, uma boa estrutura é organizada e de facil entendimento
 - A forma como os padrões de projeto forem utilizados será avaliada (redux/mobx/...)
 - Serão avaliadas boas praticas de programação em geral
-- O tempo de entrega **NÃO** sera avaliado
+- O tempo de entrega **NÃO** sera avaliado, desde que seja entregue no prazo estipulado
 
 
 
