@@ -1,5 +1,5 @@
-import React from 'react';
-import {Link as RouterLink} from 'react-router-dom';
+import React, {useState} from 'react';
+import {Link as RouterLink, useHistory} from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
@@ -11,7 +11,7 @@ import Card from "@material-ui/core/Card";
 import {REGISTER_ROUTE} from "../../../../Routes";
 
 import StartupSpaceLogo from "../../assets/image/logo/startup-space.png";
-
+import firebaseConfig from '../../../../services/firebaseConfig';
 const useStyles = makeStyles((theme) => ({
     paper: {
         marginTop: theme.spacing(8),
@@ -34,7 +34,44 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function LoginPage() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const history = useHistory();
+    var user = firebaseConfig.auth().currentUser;
 
+    if (user) {
+        history.push('/dashboard');
+
+    } 
+    const db = firebaseConfig.firestore();
+
+    function handlerSubmitFormLogin(e){
+        e.preventDefault();
+        firebaseConfig.auth().signInWithEmailAndPassword(email, password)
+        .then(function(result) {
+            localStorage.setItem('uid',result.user.uid);
+            console.log(result.user.uid);
+
+            db.collection("users").where("id", "==", result.user.uid)
+            .get()
+            .then(function(querySnapshot) {
+
+                querySnapshot.forEach(function(doc) {
+                    // doc.data() is never undefined for query doc snapshots
+                    console.log(doc.id, " => ", doc.data());
+                });
+                history.push('/dashboard');
+            })
+            .catch(function(error) {
+                console.log("Error getting documents: ", error);
+            });
+
+          // result.user.tenantId should be ‘TENANT_PROJECT_ID’.
+        }).catch(function(error) {
+            console.log(error)
+          // Handle error.
+        });
+    }
     const classes = useStyles();
 
     return (
@@ -46,7 +83,8 @@ export default function LoginPage() {
                         <div className={classes.paper}>
                             <img width="360dp" src={StartupSpaceLogo}/>
                             <Box height={"36px"}/>
-                            <form className={classes.form} noValidate>
+
+                            <form onSubmit={handlerSubmitFormLogin} className={classes.form} noValidate>
                                 <TextField
                                     variant="outlined"
                                     margin="normal"
@@ -55,6 +93,8 @@ export default function LoginPage() {
                                     id="email"
                                     label="Email"
                                     name="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     autoComplete="email"
                                     autoFocus
                                 />
@@ -67,6 +107,8 @@ export default function LoginPage() {
                                     label="Senha"
                                     type="password"
                                     id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     autoComplete="current-password"
                                 />
                                 <Box height={"24px"} />

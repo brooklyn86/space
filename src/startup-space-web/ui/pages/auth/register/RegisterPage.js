@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
@@ -11,7 +11,7 @@ import Box from "@material-ui/core/Box";
 
 import StartupSpaceLogo from "../../assets/image/logo/startup-space.png";
 import {LOGIN_ROUTE} from "../../../../Routes";
-
+import firebaseConfig from '../../../../services/firebaseConfig';
 const useStyles = makeStyles((theme) => ({
     paper: {
         marginTop: theme.spacing(8),
@@ -33,9 +33,35 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export  default function RegisterPage() {
-
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirm, setConfirm] = useState('');
     const classes = useStyles();
+    const db = firebaseConfig.firestore();
 
+    function handlerSubmitForm(e){
+        e.preventDefault();
+        firebaseConfig.auth().createUserWithEmailAndPassword(email, password)
+        .then(function(result) {
+            localStorage.setItem('uid',result.user.uid);
+            db.collection("users").add({
+                name: name,
+                id: result.user.uid,
+            })
+            .then(function(docRef) {
+                console.log("Document written with ID: ", docRef.id);
+            })
+            .catch(function(error) {
+                console.error("Error adding document: ", error);
+            });
+            console.log(result.user.uid);
+          // result.user.tenantId should be ‘TENANT_PROJECT_ID’.
+        }).catch(function(error) {
+            console.log(error)
+          // Handle error.
+        });
+    }
     return (
         <Grid container alignContent="center" justify={"center"} direction={"column"}>
             <Grid item>
@@ -44,7 +70,7 @@ export  default function RegisterPage() {
                         <div className={classes.paper}>
                             <img src={StartupSpaceLogo} width="360dp" alt="Logo"/>
                             <Box height={"36px"}/>
-                            <form className={classes.form}>
+                            <form  onSubmit={handlerSubmitForm} className={classes.form}>
                                 <TextField
                                     variant="outlined"
                                     margin="normal"
@@ -53,6 +79,8 @@ export  default function RegisterPage() {
                                     id="email"
                                     label="Email"
                                     name="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     autoComplete="email"
                                     autoFocus
                                 />
@@ -65,6 +93,8 @@ export  default function RegisterPage() {
                                     id="name"
                                     label="Nome"
                                     name="name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                     autoComplete="name"
                                 />
 
@@ -77,6 +107,8 @@ export  default function RegisterPage() {
                                     label="Senha"
                                     type="password"
                                     id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     autoComplete="current-password"
                                 />
 
@@ -89,6 +121,8 @@ export  default function RegisterPage() {
                                     label="Confirmar senha"
                                     type="password"
                                     id="confirmPassword"
+                                    value={confirm}
+                                    onChange={(e) => setConfirm(e.target.value)}
                                     autoComplete="current-password"
                                 />
                                 <Box height={"12px"} />
@@ -99,6 +133,7 @@ export  default function RegisterPage() {
                                             variant="contained"
                                             color="primary"
                                             className={classes.submit}
+                                            
                                         >
                                             Cadastrar
                                         </Button>
