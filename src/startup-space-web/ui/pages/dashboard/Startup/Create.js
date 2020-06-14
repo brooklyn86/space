@@ -29,26 +29,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function Home() {
+export default function Create() {
     const history = useHistory();
 
+    var user = firebaseConfig.auth().currentUser;
 
-    firebaseConfig.auth().onAuthStateChanged(function(user) {
-        if (!user) {
-            history.push('/entrar');
+    if (user) {
+        console.log(user.uid)
+    } else {
+        history.push('/entrar');
 
-        } 
-    });
-
+    // No user is signed in.
+    }
     const db = firebaseConfig.firestore();
 
     const classes = useStyles();
 
     return (
         <>
-        
         <Menu />
-        <Startups />
+       
         </>
     );
 }

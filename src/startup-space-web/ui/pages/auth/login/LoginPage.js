@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import {Link as RouterLink, useHistory} from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -37,12 +37,15 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const history = useHistory();
-    var user = firebaseConfig.auth().currentUser;
+    useEffect(() => {
+        var user = firebaseConfig.auth().currentUser;
 
-    if (user) {
-        history.push('/dashboard');
+        if (user) {
+            history.push('/dashboard');
+    
+        } 
+    },[]);
 
-    } 
     const db = firebaseConfig.firestore();
 
     function handlerSubmitFormLogin(e){
@@ -60,6 +63,26 @@ export default function LoginPage() {
                     // doc.data() is never undefined for query doc snapshots
                     console.log(doc.id, " => ", doc.data());
                 });
+                db.collection("startups").where("user_id", "==", result.user.uid)
+                .get()
+                .then(function(querySnapshot) {
+                    (querySnapshot.empty == false 
+                    ? 
+                    localStorage.setItem('startup',1)
+                    : 
+                    db.collection("startup_members").where("user_id", "==", result.user.uid).get()
+                    .then(function(querySnapshot) {
+                        (querySnapshot.empty == false 
+                            ? 
+                            localStorage.setItem('startup',1)
+                            : 
+                            localStorage.setItem('startup',0)
+                        )
+                    })
+
+
+                    )
+                });
                 history.push('/dashboard');
             })
             .catch(function(error) {
@@ -68,8 +91,8 @@ export default function LoginPage() {
 
           // result.user.tenantId should be ‘TENANT_PROJECT_ID’.
         }).catch(function(error) {
-            console.log(error)
-          // Handle error.
+           alert('E-mail e senha invalidos!')
+         
         });
     }
     const classes = useStyles();

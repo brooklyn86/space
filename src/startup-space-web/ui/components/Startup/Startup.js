@@ -1,11 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import {Link,useHistory} from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import {makeStyles} from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import Icon from '@material-ui/core/Icon';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
+import CreateStartup from "./Create";
 
 import Card from "@material-ui/core/Card";
 import firebaseConfig from '../../../services/firebaseConfig';
@@ -27,14 +32,15 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(1),
     },
     submit: {},
+    table: {
+      minWidth: 650,
+    },
 }));
 
 
 export default function Startups() {
     const [startups, setStartups] = useState([]);
-    const [password, setPassword] = useState('');
     const history = useHistory();
-
     const db = firebaseConfig.firestore();
 
     const classes = useStyles();
@@ -44,7 +50,8 @@ export default function Startups() {
       .then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
           // doc.data() is never undefined for query doc snapshots
-          startup.push(doc.data());
+          
+          startup.push([{'id' : doc.id, 'dados' : doc.data()}]);
       });
       
         setStartups(startup)
@@ -55,14 +62,42 @@ export default function Startups() {
     }, []);
     return (
       <div className='row'>
-        
-          {startups.map(item => (
+          <h4>Conheça algumas das nossas Statups 
+            <div className='row'>
+            <CreateStartup />
+            {
+              (localStorage.getItem('startup') == "1"
+              &&
+              <Link to={'/my-startup'}><Button>Minha Startup</Button></Link>
+              
+              )
 
-            <Container key={item.id}>
-            <Link to={`/statup/${item.id}`}><h1>{item.name}</h1></Link>
-            </Container>
-          ))}
-         
+            }
+            </div>
+          </h4>
+            <TableContainer component={Paper}>
+            <Table className={classes.table} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Startup</TableCell>
+                  <TableCell>Descrição</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {startups.map((row) => (
+                  <Link to={`/startup/${row[0].id}`}>
+                    <TableRow key={row[0].id}>
+                      <TableCell component="th" scope="row">
+                        {row[0].dados.name}
+                      </TableCell>
+                      <TableCell component="th" scope="row">{row[0].dados.description}</TableCell>
+                    </TableRow>
+                  </Link>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        
         </div>
     );
 }

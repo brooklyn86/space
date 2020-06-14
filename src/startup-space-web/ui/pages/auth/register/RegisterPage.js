@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
+import {Link, useHistory} from 'react-router-dom';
 
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {makeStyles} from "@material-ui/core/styles";
-import {Link} from "react-router-dom";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
@@ -39,6 +39,7 @@ export  default function RegisterPage() {
     const [confirm, setConfirm] = useState('');
     const classes = useStyles();
     const db = firebaseConfig.firestore();
+    const history = useHistory();
 
     function handlerSubmitForm(e){
         e.preventDefault();
@@ -49,17 +50,22 @@ export  default function RegisterPage() {
                 name: name,
                 id: result.user.uid,
             })
+
             .then(function(docRef) {
-                console.log("Document written with ID: ", docRef.id);
+                localStorage.setItem('startup',0);
+                
+                alert('Cadastrado com Sucesso')
+                history.push('/dashboard')
             })
             .catch(function(error) {
-                console.error("Error adding document: ", error);
+                history.push('/entrar')
             });
-            console.log(result.user.uid);
+           
           // result.user.tenantId should be ‘TENANT_PROJECT_ID’.
         }).catch(function(error) {
-            console.log(error)
-          // Handle error.
+  
+            alert('Falha ao realizar o cadastro')
+
         });
     }
     return (
